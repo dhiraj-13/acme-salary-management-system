@@ -21,4 +21,10 @@ describe('DashboardComponent', () => {
     const component = fixture.componentInstance;
     expect(component.title).toEqual('salary-management-frontend');
   });
+
+  it('should have default view set to employees', () => {
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    expect(component.currentView).toEqual('employees');
+  });
 });
