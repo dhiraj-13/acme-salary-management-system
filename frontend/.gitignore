@@ -1,0 +1,10 @@
+/node_modules
+/.angular
+/dist
+/out-tsc
+/coverage
+.npm
+.sass-cache
+.vscode
+*.log
+.DS_Store
