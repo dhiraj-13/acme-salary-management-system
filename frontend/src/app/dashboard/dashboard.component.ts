@@ -1,21 +1,20 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { EmployeeFormComponent } from "../employee-form/employee-form.component";
+import { EmployeeService } from "../services/employee.service";
 import { Subject, Subscription } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
 @Component({
   selector: "app-dashboard",
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, EmployeeFormComponent],
+  imports: [CommonModule, FormsModule, EmployeeFormComponent],
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   title = "salary-management-frontend";
-  API_BASE = "http://localhost:8080/api/employees";
 
   currentView = "employees";
   employees: any[] = [];
@@ -60,7 +59,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private employeeModal: any;
 
-  constructor(private http: HttpClient) {}
+  constructor(private employeeService: EmployeeService) {}
 
   ngOnInit() {
     this.searchSubscription = this.searchSubject
@@ -101,7 +100,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.selectedDepartment) params.department = this.selectedDepartment;
     if (this.selectedCountry) params.country = this.selectedCountry;
 
-    this.http.get<any>(this.API_BASE, { params }).subscribe((res) => {
+    this.employeeService.getEmployees(params).subscribe((res) => {
       this.employees = res.content;
       this.totalPages = res.totalPages;
       this.totalElements = res.totalElements;
@@ -109,24 +108,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadTotalPayroll() {
-    this.http
-      .get<any>(this.API_BASE + "/analytics/total-payroll")
-      .subscribe((res) => {
-        this.totalPayroll = res.totalPayroll;
-      });
+    this.employeeService.getTotalPayroll().subscribe((res) => {
+      this.totalPayroll = res.totalPayroll;
+    });
   }
 
   loadAnalytics() {
-    this.http
-      .get<any[]>(this.API_BASE + "/analytics/department")
-      .subscribe((res) => {
-        this.deptAnalytics = res;
-      });
-    this.http
-      .get<any[]>(this.API_BASE + "/analytics/country")
-      .subscribe((res) => {
-        this.countryAnalytics = res;
-      });
+    this.employeeService.getDepartmentAnalytics().subscribe((res) => {
+      this.deptAnalytics = res;
+    });
+    this.employeeService.getCountryAnalytics().subscribe((res) => {
+      this.countryAnalytics = res;
+    });
   }
 
   changePage(newPage: number) {
@@ -164,17 +157,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   saveEmployee(employeeData: any) {
-    // console.log(employeeData);
     if (employeeData.id) {
-      this.http
-        .put(this.API_BASE + "/" + employeeData.id, employeeData)
-        .subscribe(() => {
-          if (this.employeeModal) this.employeeModal.hide();
-          this.loadEmployees();
-          this.loadTotalPayroll();
-        });
+      this.employeeService.updateEmployee(employeeData.id, employeeData).subscribe(() => {
+        if (this.employeeModal) this.employeeModal.hide();
+        this.loadEmployees();
+        this.loadTotalPayroll();
+      });
     } else {
-      this.http.post(this.API_BASE, employeeData).subscribe(() => {
+      this.employeeService.createEmployee(employeeData).subscribe(() => {
         if (this.employeeModal) this.employeeModal.hide();
         this.loadEmployees();
         this.loadTotalPayroll();
@@ -190,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   deleteEmployee(id: number) {
     if (confirm("Are you sure you want to delete this employee?")) {
-      this.http.delete(this.API_BASE + "/" + id).subscribe(() => {
+      this.employeeService.deleteEmployee(id).subscribe(() => {
         this.loadEmployees();
         this.loadTotalPayroll();
       });
