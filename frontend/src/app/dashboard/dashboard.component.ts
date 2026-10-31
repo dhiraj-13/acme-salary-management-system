@@ -164,6 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   saveEmployee(employeeData: any) {
+    // console.log(employeeData);
     if (employeeData.id) {
       this.http
         .put(this.API_BASE + "/" + employeeData.id, employeeData)
