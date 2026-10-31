@@ -65,8 +65,8 @@
               type="text"
               class="form-control"
               placeholder="Search by name or email..."
-              [(ngModel)]="searchQuery"
-              (input)="loadEmployees()"
+              [ngModel]="searchQuery"
+              (ngModelChange)="onSearchChange($event)"
             />
           </div>
           <div class="col-md-3">

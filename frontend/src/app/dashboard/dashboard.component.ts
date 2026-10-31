@@ -1,8 +1,10 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { HttpClient, HttpClientModule } from "@angular/common/http";
 import { EmployeeFormComponent } from "../employee-form/employee-form.component";
+import { Subject, Subscription } from "rxjs";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 
 @Component({
   selector: "app-dashboard",
@@ -11,7 +13,7 @@ import { EmployeeFormComponent } from "../employee-form/employee-form.component"
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.scss"],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   title = "salary-management-frontend";
   API_BASE = "http://localhost:8080/api/employees";
 
@@ -20,6 +22,9 @@ export class DashboardComponent implements OnInit {
   searchQuery = "";
   selectedDepartment = "";
   selectedCountry = "";
+
+  private searchSubject = new Subject<string>();
+  private searchSubscription!: Subscription;
 
   displayedColumns = [
     { label: "Name", field: "name" },
@@ -58,6 +63,13 @@ export class DashboardComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    this.searchSubscription = this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage = 0;
+        this.loadEmployees();
+      });
+
     this.loadEmployees();
     this.loadTotalPayroll();
 
@@ -67,6 +79,17 @@ export class DashboardComponent implements OnInit {
         this.employeeModal = new (window as any).bootstrap.Modal(modalEl);
       }
     }, 500);
+  }
+
+  ngOnDestroy() {
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+  }
+
+  onSearchChange(searchTerm: string) {
+    this.searchQuery = searchTerm;
+    this.searchSubject.next(searchTerm);
   }
 
   loadEmployees() {
