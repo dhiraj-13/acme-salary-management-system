@@ -1,0 +1,272 @@
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1"
+      ><i class="fa-solid fa-building-columns me-2"></i> ACME Org Salary
+      Management (10,000 Employees)</span
+    >
+    <div>
+      <button
+        class="btn btn-outline-light btn-sm me-2"
+        (click)="currentView = 'employees'"
+      >
+        <i class="fa-solid fa-users me-1"></i> Employees
+      </button>
+      <button
+        class="btn btn-outline-light btn-sm"
+        (click)="currentView = 'analytics'; loadAnalytics()"
+      >
+        <i class="fa-solid fa-chart-pie me-1"></i> Analytics
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid my-4">
+  <!-- EMPLOYEE VIEW -->
+  <div *ngIf="currentView == 'employees'">
+    <!-- Metrics Cards -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+          <div class="card-body">
+            <h6 class="card-title text-uppercase">
+              Total Payroll (Base + Bonus)
+            </h6>
+            <h3 class="fw-bold">
+              {{ totalPayroll | currency : "USD" : "symbol" : "1.0-0" }}
+            </h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-success text-white">
+          <div class="card-body">
+            <h6 class="card-title text-uppercase">Total Employees</h6>
+            <h3 class="fw-bold">{{ totalElements || 10000 }}</h3>
+          </div>
+        </div>
+      </div>
+      <div
+        class="col-md-4 text-end d-flex align-items-center justify-content-end"
+      >
+        <button class="btn btn-dark btn-lg shadow-sm" (click)="openAddModal()">
+          <i class="fa-solid fa-user-plus me-2"></i> Add Employee
+        </button>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search by name or email..."
+              [(ngModel)]="searchQuery"
+              (input)="loadEmployees()"
+            />
+          </div>
+          <div class="col-md-3">
+            <select
+              class="form-select"
+              [(ngModel)]="selectedDepartment"
+              (change)="loadEmployees()"
+            >
+              <option value="">All Departments</option>
+              <option *ngFor="let dept of departments" [value]="dept">
+                {{ dept }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select
+              class="form-select"
+              [(ngModel)]="selectedCountry"
+              (change)="loadEmployees()"
+            >
+              <option value="">All Countries</option>
+              <option *ngFor="let country of countries" [value]="country">
+                {{ country }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-2 text-end">
+            <button
+              class="btn btn-outline-secondary w-100"
+              (click)="resetFilters()"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Table -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th
+                  *ngFor="let col of displayedColumns"
+                  [class]="col.class || ''"
+                >
+                  {{ col.label }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let emp of employees">
+                <td class="fw-semibold">
+                  {{ emp.firstName }} {{ emp.lastName }}
+                </td>
+                <td>{{ emp.email }}</td>
+                <td>
+                  <span class="badge bg-secondary">{{ emp.department }}</span>
+                </td>
+                <td>{{ emp.country }}</td>
+                <td>{{ emp.baseSalary | number : "1.2-2" }}</td>
+                <td>{{ emp.bonus | number : "1.2-2" }}</td>
+                <td>{{ emp.currency }}</td>
+                <td class="text-end">
+                  <button
+                    class="btn btn-sm btn-outline-primary me-1"
+                    (click)="openEditModal(emp)"
+                  >
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="deleteEmployee(emp.id)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="employees.length == 0">
+                <td colspan="8" class="text-center py-4 text-muted">
+                  No employees found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="card-footer bg-white d-flex justify-content-between align-items-center py-3"
+      >
+        <span
+          >Showing page {{ currentPage + 1 }} of {{ totalPages }} (Total:
+          {{ totalElements }} employees)</span
+        >
+        <div>
+          <button
+            class="btn btn-outline-dark btn-sm me-1"
+            [disabled]="currentPage == 0"
+            (click)="changePage(currentPage - 1)"
+          >
+            Previous
+          </button>
+          <button
+            class="btn btn-outline-dark btn-sm"
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="changePage(currentPage + 1)"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS VIEW -->
+  <div *ngIf="currentView == 'analytics'">
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-dark text-white">
+            Department Payroll Breakdown
+          </div>
+          <div class="card-body">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Headcount</th>
+                  <th>Avg Base Salary</th>
+                  <th>Total Payroll</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let dept of deptAnalytics">
+                  <td class="fw-semibold">{{ dept.department }}</td>
+                  <td>{{ dept.employeeCount }}</td>
+                  <td>{{ dept.avgSalary | number : "1.2-2" }}</td>
+                  <td>{{ dept.totalPayroll | number : "1.2-2" }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-dark text-white">
+            Country Payroll Breakdown
+          </div>
+          <div class="card-body">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Country</th>
+                  <th>Headcount</th>
+                  <th>Avg Base Salary</th>
+                  <th>Total Payroll</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of countryAnalytics">
+                  <td class="fw-semibold">{{ c.country }}</td>
+                  <td>{{ c.employeeCount }}</td>
+                  <td>{{ c.avgSalary | number : "1.2-2" }}</td>
+                  <td>{{ c.totalPayroll | number : "1.2-2" }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">
+          {{ isEditMode ? "Edit Employee" : "Add New Employee" }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <app-employee-form
+          [employee]="currentEmployee"
+          [isEditMode]="isEditMode"
+          (save)="saveEmployee($event)"
+          (cancel)="cancelForm()"
+        ></app-employee-form>
+      </div>
+    </div>
+  </div>
+</div>

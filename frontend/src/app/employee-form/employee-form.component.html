@@ -1,0 +1,141 @@
+<form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+  <div class="mb-3">
+    <label class="form-label">First Name <span class="text-danger">*</span></label>
+    <input
+      type="text"
+      class="form-control"
+      formControlName="firstName"
+      [ngClass]="{'is-invalid': employeeForm.get('firstName')?.invalid && employeeForm.get('firstName')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('firstName')?.errors?.['required']">
+      First Name is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Last Name <span class="text-danger">*</span></label>
+    <input
+      type="text"
+      class="form-control"
+      formControlName="lastName"
+      [ngClass]="{'is-invalid': employeeForm.get('lastName')?.invalid && employeeForm.get('lastName')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('lastName')?.errors?.['required']">
+      Last Name is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email <span class="text-danger">*</span></label>
+    <input
+      type="email"
+      class="form-control"
+      formControlName="email"
+      [ngClass]="{'is-invalid': employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('email')?.errors?.['required']">
+      Email is required.
+    </div>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('email')?.errors?.['email']">
+      Please enter a valid email address.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Department <span class="text-danger">*</span></label>
+    <select
+      class="form-select"
+      formControlName="department"
+      [ngClass]="{'is-invalid': employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched}"
+    >
+      <option value="">Select Department</option>
+      <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+    </select>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('department')?.errors?.['required']">
+      Department is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Country <span class="text-danger">*</span></label>
+    <select
+      class="form-select"
+      formControlName="country"
+      [ngClass]="{'is-invalid': employeeForm.get('country')?.invalid && employeeForm.get('country')?.touched}"
+    >
+      <option value="">Select Country</option>
+      <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+    </select>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('country')?.errors?.['required']">
+      Country is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Base Salary <span class="text-danger">*</span></label>
+    <input
+      type="number"
+      class="form-control"
+      formControlName="baseSalary"
+      [ngClass]="{'is-invalid': employeeForm.get('baseSalary')?.invalid && employeeForm.get('baseSalary')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('baseSalary')?.errors?.['required']">
+      Base Salary is required.
+    </div>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('baseSalary')?.errors?.['min']">
+      Base Salary cannot be negative.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Bonus <span class="text-danger">*</span></label>
+    <input
+      type="number"
+      class="form-control"
+      formControlName="bonus"
+      [ngClass]="{'is-invalid': employeeForm.get('bonus')?.invalid && employeeForm.get('bonus')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('bonus')?.errors?.['required']">
+      Bonus is required.
+    </div>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('bonus')?.errors?.['min']">
+      Bonus cannot be negative.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Currency <span class="text-danger">*</span></label>
+    <select
+      class="form-select"
+      formControlName="currency"
+      [ngClass]="{'is-invalid': employeeForm.get('currency')?.invalid && employeeForm.get('currency')?.touched}"
+    >
+      <option *ngFor="let curr of currencies" [value]="curr">{{ curr }}</option>
+    </select>
+    <div class="invalid-feedback" *ngIf="employeeForm.get('currency')?.errors?.['required']">
+      Currency is required.
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Effective Date <span class="text-danger">*</span></label>
+    <input
+      type="date"
+      class="form-control"
+      formControlName="effectiveDate"
+      [ngClass]="{'is-invalid': employeeForm.get('effectiveDate')?.invalid && employeeForm.get('effectiveDate')?.touched}"
+    />
+    <div class="invalid-feedback" *ngIf="employeeForm.get('effectiveDate')?.errors?.['required']">
+      Effective Date is required.
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">
+      Cancel
+    </button>
+    <button type="submit" class="btn btn-dark">
+      {{ isEditMode ? 'Update Employee' : 'Save Employee' }}
+    </button>
+  </div>
+</form>
